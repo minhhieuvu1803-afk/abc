@@ -1,12 +1,12 @@
 local player = game.Players.LocalPlayer
-local VirtualUser = game:GetService("VirtualUser")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
+local UIS = game:GetService("UserInputService")
 local playerGui = player:WaitForChild("PlayerGui")
 
 -- Tạo ScreenGui
 local gui = Instance.new("ScreenGui")
-gui.Name = "UltimateSafeFarm"
+gui.Name = "UltimateSafeFarmFixed"
 gui.ResetOnSpawn = false
 gui.Parent = playerGui
 
@@ -85,7 +85,7 @@ addCorner(autoFarmBtn, 6)
 local autoSwingEnabled = false
 local autoFarmEnabled = false
 local currentTween = nil
-local FLY_SPEED = 70 -- BẢO MẬT: Tốc độ rất chậm và an toàn
+local FLY_SPEED = 70 
 
 local function makeDraggable(dragHandle, targetFrame)
     local dragging, dragInput, dragStart, startPos
@@ -144,14 +144,12 @@ local function getNearestMob()
 end
 
 -- ================= VÒNG LẶP AUTO FARM (GIẢ LẬP NGƯỜI) ================= --
--- Vòng lặp vung vũ khí ngẫu nhiên
 task.spawn(function()
-    while task.wait(math.random(15, 35) / 100) do -- BẢO MẬT: Delay click ngẫu nhiên từ 0.15s đến 0.35s
+    while task.wait(math.random(15, 35) / 100) do 
         if autoSwingEnabled or autoFarmEnabled then
             local char = player.Character
             if char then
                 local equippedTool = char:FindFirstChildOfClass("Tool")
-                -- Giả lập tỉ lệ đánh hụt 10% (Chỉ vung nếu số ngẫu nhiên > 10)
                 if equippedTool and math.random(1, 100) > 10 then 
                     equippedTool:Activate() 
                 end
@@ -160,7 +158,6 @@ task.spawn(function()
     end
 end)
 
--- Vòng lặp di chuyển an toàn
 task.spawn(function()
     while task.wait(0.5) do
         if autoFarmEnabled then
@@ -177,10 +174,9 @@ task.spawn(function()
                     root.AssemblyLinearVelocity = Vector3.zero
                     local mobRoot = mob.HumanoidRootPart
                     
-                    -- BẢO MẬT: Tạo sai số tọa độ ngẫu nhiên từ -2.5 đến 2.5 stud xung quanh quái
                     local rX = math.random(-25, 25) / 10
                     local rZ = math.random(-25, 25) / 10
-                    local rY = 6 + (math.random(-5, 5) / 10) -- Độ cao cũng thay đổi nhẹ
+                    local rY = 6 + (math.random(-5, 5) / 10) 
                     
                     local targetCFrame = mobRoot.CFrame * CFrame.new(rX, rY, rZ) * CFrame.Angles(math.rad(-90), 0, 0)
                     
@@ -200,7 +196,6 @@ task.spawn(function()
                     
                     if currentTween then currentTween:Cancel() end
                     
-                    -- BẢO MẬT CHỐNG BAN CỐT LÕI: Nghỉ mệt sau khi giết quái (0.5s đến 1.5s)
                     if autoFarmEnabled and (not mob:FindFirstChild("Humanoid") or mob.Humanoid.Health <= 0) then
                         task.wait(math.random(5, 15) / 10)
                     end
@@ -215,13 +210,14 @@ local function toggleColor(btn, state)
     btn.BackgroundColor3 = state and Color3.fromRGB(50, 150, 80) or Color3.fromRGB(70, 70, 70)
 end
 
-autoSwingBtn.MouseButton1Click:Connect(function()
+-- Dùng Activated thay vì MouseButton1Click để hỗ trợ cực nhạy cho cả PC và Mobile
+autoSwingBtn.Activated:Connect(function()
     autoSwingEnabled = not autoSwingEnabled
     autoSwingBtn.Text = autoSwingEnabled and "Auto Swing: ON" or "Auto Swing: OFF"
     toggleColor(autoSwingBtn, autoSwingEnabled)
 end)
 
-autoFarmBtn.MouseButton1Click:Connect(function()
+autoFarmBtn.Activated:Connect(function()
     autoFarmEnabled = not autoFarmEnabled
     autoFarmBtn.Text = autoFarmEnabled and "Safe Auto Farm: ON" or "Safe Auto Farm: OFF"
     toggleColor(autoFarmBtn, autoFarmEnabled)
@@ -238,9 +234,9 @@ autoFarmBtn.MouseButton1Click:Connect(function()
     end
 end)
 
-closeBtn.MouseButton1Click:Connect(function()
+closeBtn.Activated:Connect(function()
     autoSwingEnabled = false
     autoFarmEnabled = false
     if currentTween then currentTween:Cancel() end
     gui:Destroy()
-end)
+end) 
